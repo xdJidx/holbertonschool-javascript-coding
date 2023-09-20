@@ -1,33 +1,22 @@
 #!/usr/bin/node
-
 const request = require('request');
+let countFilms = 0;
 
-const apiUrl = process.argv[2];
+request(process.argv[2], function (err, _response, body) {
+  if (err == null) {
+    const resp = JSON.parse(body); // Analyse la resp JSON en un objet JS
 
-if (!apiUrl) {
-  console.error('Usage: node 4-starwars_count.js <API_URL>');
-  process.exit(1);
-}
+    const { results } = resp;// Obtient la propriété 'results' de l'objet 'resp'.
 
-request(apiUrl, (error, response, body) => {
-  if (error) {
-    console.error('Error:', error);
-    process.exit(1);
+    for (const element of results) {
+      const { characters } = element;
+
+      for (const personnage of characters) {
+        if (personnage.search('18') >= 0) {
+          countFilms++;
+        }
+      }
+    }
   }
-
-  if (response.statusCode !== 200) {
-    console.error(`Status code: ${response.statusCode}`);
-    process.exit(1);
-  }
-
-  const filmsData = JSON.parse(body);
-  const characterId = 18;
-
-  // Filter the films where Wedge Antilles (character ID 18) is present
-  const filmsAge = filmsData.results.filter((film) =>
-    film.characters.includes(`https://swapi-api.hbtn.io/api/people/${characterId}/`)
-  );
-
-  // Print the number of films where Wedge Antilles is present
-  console.log(filmsAge.length);
+  console.log(countFilms);
 });
