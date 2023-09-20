@@ -1,41 +1,32 @@
 #!/usr/bin/node
-
 const request = require('request');
 
 const apiUrl = process.argv[2];
 
-if (!apiUrl) {
-  console.error('Usage: node 6-completed_tasks.js <API_URL>');
-  process.exit(1);
-}
-
-// Define an object to store the count of completed tasks per user
-const completedTasksByUser = {};
-
 request(apiUrl, (error, response, body) => {
-  if (error) {
-    console.error('Error:', error);
-    process.exit(1);
-  }
+  if (!error && response.statusCode === 200) {
+    const todo = JSON.parse(body);
 
-  if (response.statusCode !== 200) {
-    console.error(`Status code: ${response.statusCode}`);
-    process.exit(1);
-  }
+    const completedTasksByUser = {};
 
-  const todos = JSON.parse(body);
+    // Parcourt les tâches dans la réponse JSON.
+    for (const task of todo) {
+      // Vérifie si la tâche est complétée.
+      if (task.completed) {
+        // Obtient l'ID de l'utilisateur de la tâche.
+        const userId = task.userId;
 
-  // Iterate through the todos and count completed tasks per user
-  for (const todo of todos) {
-    if (todo.completed) {
-      if (completedTasksByUser[todo.userId]) {
-        completedTasksByUser[todo.userId]++;
-      } else {
-        completedTasksByUser[todo.userId] = 1;
+        if (completedTasksByUser[userId]) {
+          completedTasksByUser[userId]++;
+        } else {
+        // user a accompli sa 1er tâche complétée.
+          completedTasksByUser[userId] = 1;
+        }
       }
     }
-  }
 
-  // Print the completed tasks count per user as JSON object
-  console.log(JSON.stringify(completedTasksByUser, null, 2));
+    console.log(completedTasksByUser);
+  } else {
+    console.error(error || `Code d'état ${response.statusCode}`);
+  }
 });
