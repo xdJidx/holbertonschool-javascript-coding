@@ -9,17 +9,17 @@ request(apiUrl, (error, response, body) => {
 
     const completedTasksByUser = {};
 
-    // Parcourt les tâches dans la réponse JSON.
+    // list task in Json
     for (const task of todo) {
-      // Vérifie si la tâche est complétée.
+      // Verrify if task is complete
       if (task.completed) {
-        // Obtient l'ID de l'utilisateur de la tâche.
+        // obtent ID of user
         const userId = task.userId;
 
         if (completedTasksByUser[userId]) {
           completedTasksByUser[userId]++;
         } else {
-        // user a accompli sa 1er tâche complétée.
+        // user ccomplete firt task
           completedTasksByUser[userId] = 1;
         }
       }
