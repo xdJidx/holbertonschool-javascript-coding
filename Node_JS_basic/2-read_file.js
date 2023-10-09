@@ -3,13 +3,13 @@ const fs = require('fs');
 function countStudents(path) {
   try {
     const data = fs.readFileSync(path, 'utf-8');
-    const lines = data.split('\n');
+    const lines = data.split('\n').filter(Boolean);
 
     const students = lines.slice(1).map((line) => {
       const [firstName, lastName, age, field] = line.split(',');
 
       return {
-        firstName, lastName, age: parseInt(age, 10), field,
+        firstName, lastName, age, field,
       };
     });
 
