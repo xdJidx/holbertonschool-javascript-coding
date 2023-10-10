@@ -1,40 +1,34 @@
-// Import the HTTP module to create a server
-const http = require('http');
-// Import the countStudents function to read and process the CSV file
-const countStudents = require('./3-read_file_async');
+// Import the 'http' module to create an HTTP server
+const http = require("http");
+// Import the 'countStudents' function
+const countStudents = require("./3-read_file_async");
 
 // Create an HTTP server
 const app = http.createServer(async (req, res) => {
-  // Set the content type of the response
-  res.setHeader('Content-Type', 'text/plain');
+  // Set the status code to 200 and the content type to plain text
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/plain");
 
-  // Handle the root route
-  if (req.url === '/') {
-    res.end('Hello Holberton School!');
-  } else if (req.url === '/students') {
+  // Define route
+  if (req.url === "/") {
+    // Respond with a simple greeting
+    res.end("Hello Holberton School!");
+  } else if (req.url === "/students") {
+    // Respond with a message indicating the list of students
+    res.write("This is the list of our students\n");
+
     try {
-      const messages = [];
-      messages.push('This is the list of our students');
-
-      // Retrieve student data from the CSV file
-      const data = await countStudents('database.csv');
-
-      // Add the total number of students to the messages array
-      messages.push(`Number of students: ${data.total}`);
-
-      // Add the number of students per field to the messages array
-      for (const [field, students] of Object.entries(data.fields)) {
-        messages.push(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
-      }
-
-      // Send the messages as a response
-      res.end(messages.join('\n'));
+      // Read and process student data
+      const data = await countStudents(process.argv[2]);
+      // Send the student data as a response
+      res.end(`${data.join("\n")}`);
     } catch (error) {
+      // Handle errors by sending an error message
       res.end(error.message);
     }
   } else {
-    res.statusCode = 404;
-    res.end('Not found');
+    // Respond with a "Not Found" message for unrecognized routes
+    res.end("Not Found\n");
   }
 });
 
