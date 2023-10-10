@@ -21,7 +21,7 @@ const app = http.createServer(async (req, res) => {
       // Read and process student data
       const data = await countStudents(process.argv[2]);
       // Send the student data as a response
-      res.end(`${data.join('\n')}`);
+      res.end(`${data.join('\n').filter(Boolean)}`);
     } catch (error) {
       // Handle errors by sending an error message
       res.end(error.message);
