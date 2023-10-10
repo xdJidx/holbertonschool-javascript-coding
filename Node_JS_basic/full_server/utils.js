@@ -8,7 +8,7 @@ function readDatabase(filePath) {
         const fields = {};
 
         lines.forEach((line) => {
-          const [firstName, , , field] = line.split(',');
+          const [firstName, , , field] = line.split(',').filter(Boolean);
           if (field) {
             const trimmedField = field.trim();
             if (fields[trimmedField]) {
