@@ -1,61 +1,45 @@
+// Import the HTTP module to create a server
 const http = require('http');
-const fs = require('fs');
-
-const databasePath = process.argv[2];
+// Import the countStudents function to read and process the CSV file
+const countStudents = require('./3-read_file_async');
 
 // Create an HTTP server
-const app = http.createServer((req, res) => {
-  // Set the HTTP response header to indicate plain text
+const app = http.createServer(async (req, res) => {
+  // Set the content type of the response
   res.setHeader('Content-Type', 'text/plain');
 
+  // Handle the root route
   if (req.url === '/') {
-    // If the URL path is '/', display "Hello Holberton School!"
-    res.end('Hello Holberton School!\n');
+    res.end('Hello Holberton School!');
   } else if (req.url === '/students') {
-    // If the URL path is '/students', read the database file and display the content
-    readDatabaseAndSendResponse(res);
+    try {
+      const messages = [];
+      messages.push('This is the list of our students');
+
+      // Retrieve student data from the CSV file
+      const data = await countStudents('database.csv');
+
+      // Add the total number of students to the messages array
+      messages.push(`Number of students: ${data.total}`);
+
+      // Add the number of students per field to the messages array
+      for (const [field, students] of Object.entries(data.fields)) {
+        messages.push(`Number of students in ${field}: ${students.length}. List: ${students.join(', ')}`);
+      }
+
+      // Send the messages as a response
+      res.end(messages.join('\n'));
+    } catch (error) {
+      res.end(error.message);
+    }
   } else {
-    // For any other URL path, return a 404 response
-    res.writeHead(404);
-    res.end('Not Found\n');
+    res.statusCode = 404;
+    res.end('Not found');
   }
 });
 
-// Listen on port 1245
-app.listen(1245, () => {
-  console.log('Server is running on port 1245');
-});
+// Start the server to listen on port 1245
+app.listen(1245);
 
-function readDatabaseAndSendResponse(res) {
-  fs.readFile(databasePath, 'utf8', (err, data) => {
-    if (err) {
-      res.end('Cannot load the database\n');
-    } else {
-      const lines = data.split('\n').filter(Boolean);
-      const fields = {};
-
-      lines.forEach((line) => {
-        const parts = line.split(':');
-        if (parts.length === 2) {
-          const student = parts[0].trim();
-          const field = parts[1].trim();
-          if (fields[field]) {
-            fields[field].push(student);
-          } else {
-            fields[field] = [student];
-          }
-        }
-      });
-
-      res.write('This is the list of our students\n');
-      res.write(`Number of students: ${lines.length}\n`);
-      for (const field in fields) {
-        res.write(`Number of students in ${field}: ${fields[field].length}. List: ${fields[field].join(', ')}\n`);
-      }
-      res.end();
-    }
-  });
-}
-
-// Export the app variable
+// Export the application for potential use in other modules
 module.exports = app;
